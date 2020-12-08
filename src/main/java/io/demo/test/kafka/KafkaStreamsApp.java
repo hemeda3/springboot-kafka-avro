@@ -71,14 +71,8 @@ class UserProcessor {
 
 
 
-    /**
-     *  Transactions is a fact:  because  it's large, with frequent updates and there is new data arrivals
-     *  Customer is a dimension : because smaller with a potentially less frequent update rate
-     *  We don't need to use GlobalKTable if the we will repartion
-     *
-     *
-     * @return
-     */
+
+
 
 
 
@@ -107,22 +101,6 @@ class UserProcessor {
     }
 
 
-
-    //
-//  @Bean
-//  public java.util.function.Consumer<KStream<String, Transaction>> processTransaction() {
-//    return input ->
-//    {
-//
-//        input.foreach((key, value) -> {
-//
-//
-////            System.out.println("Transaction Key: " + key + " Value: " + value);
-//        });
-//    };
-//  }
-//
-//
   @Bean
   public java.util.function.Consumer<KStream<String, Customer>> processCustomer() {
     return input ->
@@ -133,7 +111,22 @@ class UserProcessor {
 
   }
 
-//
+
+
+
+
+  @Bean
+  public java.util.function.Consumer<KStream<String, Transaction>> processTransaction() {
+    return input ->
+    {
+
+        input.foreach((key, value) -> {
+
+
+            System.out.println("Transaction Key: " + key + " Value: " + value);
+        });
+    };
+  }
 
 
 
