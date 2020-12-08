@@ -1,45 +1,91 @@
-topic:
-  name: users
-  partitions-num: 3
-  replication-factor: 1
+
+#########  processCustomer && Transactions
+spring.cloud.stream.bindings.processCustomerTransactions-in-0:
+  destination: Balance
+  consumer:
+    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+    keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+    application-id: processCustomerTransactions_in_0
+spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-in-0:
+  consumer:
+    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+    keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+    application-id: processCustomerTransactions_in_0
+
+spring.cloud.stream.bindings.processCustomerTransactions-in-1:
+  destination: Customer
+spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-in-1:
+  consumer:
+    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+    application-id: processCustomerTransactions_in_1
+    materializedAs: store.Customer
+
+spring.cloud.stream.bindings.processCustomerTransactions-out-0:
+  destination: CustomerBalance
+spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-out-0:
+  consumer:
+    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+    keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+    application-id: processCustomerTransactions_out_0
+spring.cloud.stream.function.bindings.processCustomerTransactions-out-0: CustomerBalance
+spring.cloud.stream.function.bindings.processCustomerTransactions-in-0: Balance
+spring.cloud.stream.function.bindings.processCustomerTransactions-in-1: Customer
+
+
+
+
+
+######### ######### ######### #########
+spring.cloud.stream.function.definition: processCustomer;processTransaction;processCustomerTransactions
+
+spring.cloud.stream.kafka.streams.binder.configuration.default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+spring.cloud.stream.kafka.streams.binder.configuration.default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+
+
+######### #########  FOR DOUBLE CHECK ######### #########
+#########  processCustomer Only
+spring.cloud.stream.kafka.binder.autoCreateTopics: false
+spring.cloud.stream.bindings.processCustomer-in-0:
+  destination: Customer
+spring.cloud.stream.kafka.streams.bindings.processCustomer-in-0:
+  consumer:
+    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+    application-id: processCustomer-in-0
+
 server:
   port: 9080
 spring:
   kafka:
+    streams:
+      binder:
+        applicationId: moaii-cep
+        configuration:
+          auto.commit.interval.ms: 100
+          auto.offset.reset: latest
+          default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+
+
     properties:
       bootstrap.servers: localhost:9092
       schema.registry.url: http://localhost:8081
     consumer:
       group-id: my-microservice
       auto-offset-reset: latest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        specific.avro.reader: true
-        interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-      properties:
-        interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
-    template:
-      default-topic:
+#      properties:
+#        interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
 logging:
   level:
     root: info
-    
-# spring cloud streams    
-spring.cloud.stream.kafka.streams.binder.configuration.commit.interval.ms: 1000
-spring.cloud.stream.kafka.streams:
-  binder.configuration:
-    default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-    default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-  bindings.users.consumer.application-id: user-filter
-spring.cloud.stream.bindings.users-filtered:
-  destination: users-filtered
-  producer:
-    useNativeEncoding: true
-spring.cloud.stream.bindings.users:
-  destination: users
-  consumer:
-    useNativeDecoding: true
+spring.application.name: kafka-streams-iq-advanced-sample
+#spring.cloud.stream.bindings.input.consumer.useNativeDecoding: false
+
+#########  processTransaction Only
+
+#spring.cloud.stream.bindings.processTransaction-in-0:
+#  destination: Balance
+#spring.cloud.stream.kafka.streams.bindings.processTransaction-in-0:
+#  consumer:
+#    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+#    application-id: processtransaction-in-0
+#

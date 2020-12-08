@@ -1,5 +1,0 @@
-{
-  "brokers": "kafka.santamaria.cf-app.com:9092",
-  "jaasconfig": "org.apache.kafka.common.security.plain.PlainLoginModule required username='test' password='test123';",
-  "sr": "http://schemaregistry.santamaria.cf-app.com/"
-}

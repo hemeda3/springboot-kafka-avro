@@ -9,16 +9,16 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.confluent.developer</groupId>
-    <artifactId>kafka-workshop</artifactId>
+    <artifactId>kafka-test</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>kafka-workshop</name>
+    <name>kafka-test</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
         <java.version>1.8</java.version>
         <spring-cloud.version>Hoxton.SR1</spring-cloud.version>
         <!-- The main class to start by executing "java -jar" -->
-        <start-class>io.confluent.developer.kafkaworkshop.avro.KafkaWorkshopApplication</start-class>
+        <start-class>io.demo.test.kafka.KafkaStreamsApp</start-class>
     </properties>
 
     <dependencies>
@@ -149,7 +149,7 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>src/main/avro</sourceDirectory> <!--5-->
+                            <sourceDirectory>src/main/resources/avro</sourceDirectory> <!--5-->
                             <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                             <stringType>String</stringType>
                         </configuration>
