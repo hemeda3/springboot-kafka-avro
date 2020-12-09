@@ -1,7 +1,7 @@
 
 #########  processCustomer && Transactions
 spring.cloud.stream.bindings.processCustomerTransactions-in-0:
-  destination: Balance
+  destination: Transaction
   consumer:
     valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
     keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
