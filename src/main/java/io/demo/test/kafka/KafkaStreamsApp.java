@@ -3,8 +3,8 @@ package io.demo.test.kafka;
 import com.ibm.gbs.schema.Customer;
 import com.ibm.gbs.schema.CustomerBalance;
 import com.ibm.gbs.schema.Transaction;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.kstream.GlobalKTable;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.apachecommons.CommonsLog;
 
-import java.util.function.BiFunction;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.BiConsumer;
+
 
 
 @SpringBootApplication
@@ -42,137 +45,44 @@ class UserProcessor {
      * @return
      */
 
-
     @Bean
-    public BiFunction<KStream<String, Transaction>, GlobalKTable<String, Customer>, KStream<String, CustomerBalance>>
-    processCustomerTransactions() {
+    public BiConsumer<KStream<String, Transaction>, KTable<String, Customer>> processCustomerTransactions() {
+
+
+          final Map<String, String> serdeConfig = Collections.singletonMap(
+                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+
+        final SpecificAvroSerde<Customer> customerSerder = new SpecificAvroSerde<>();
+        final SpecificAvroSerde<Transaction> transactionSerder = new SpecificAvroSerde<>();
+        final SpecificAvroSerde<CustomerBalance> customerBalanceSerder = new SpecificAvroSerde<>();
+
+        customerSerder.configure(serdeConfig, false);
+        transactionSerder.configure(serdeConfig, false);
+        customerBalanceSerder.configure(serdeConfig, false);
 
         return (transactions, customers) ->
         {
 
-
             // join to the customers's channel
             KStream<String, CustomerBalance> join = transactions.join(customers,
-                    (k, v) -> v.getAccountId(),
                     (v1, v2) -> {
+
                         CustomerBalance customerBalance = CustomerBalance.newBuilder()
                                 .setPhoneNumber(v2.getPhoneNumber()).setCustomerId(v2.getCustomerId())
                                 .setAccountId(v1.getAccountId()).setBalance(v1.getBalance()).build();
+                        System.out.println(" Print customerBalance : "+customerBalance);
+
                         return customerBalance;
-                    }
-            );
+                    });
 
-            return join;
+            //  instead of using BiFunction used "to"
+            join.to("CustomerBalance");
+
+
 
 
         };
 
     }
-
-
-
-
-
-
-
-
-    public BiFunction<KStream<String,Transaction>, KTable<String,Customer>,KStream<String,CustomerBalance>>
-    processCustomerTransactions1(){
-
-        return(transactions,customers)->
-        {
-            KStream<String,CustomerBalance>join=transactions.map((key,purchase)->
-                    KeyValue.pair(purchase.getAccountId(),purchase))
-                    .join(customers,
-                            (v1,v2)->{
-                                CustomerBalance customerBalance=CustomerBalance.newBuilder()
-                                        .setPhoneNumber(v2.getPhoneNumber()).setCustomerId(v2.getCustomerId())
-                                        .setAccountId(v1.getAccountId()).setBalance(v1.getBalance()).build();
-                                return customerBalance;
-                            }
-                    );
-
-
-            return join;
-
-
-        };
-
-    }
-
-
-  @Bean
-  public java.util.function.Consumer<KStream<String, Customer>> processCustomer() {
-    return input ->
-            input.foreach((key, value) -> {
-
-              System.out.println(" Customer Key: " + key + " Value: " + value);
-            });
-
-  }
-
-
-
-
-
-  @Bean
-  public java.util.function.Consumer<KStream<String, Transaction>> processTransaction() {
-    return input ->
-    {
-
-        input.foreach((key, value) -> {
-
-
-            System.out.println("Transaction Key: " + key + " Value: " + value);
-        });
-    };
-  }
-
-
-
-//
-//  public java.util.function.BiConsumer<KStream<String, Transaction>,KStream<String, Customer>> processCustomerTransactions() {
-//    return (transactionKStream,customerKStream) ->
-//    {
-//
-//      customerKStream.foreach((key, value) -> {
-//
-//                System.out.println(" Customer Key - : " + key + " Value: " + value);
-//              }
-//      );
-//      transactionKStream.foreach((key, value) -> {
-//
-//                System.out.println(" Transaction Key - : " + key + " Value: " + value);
-//              }
-//      );
-//
-//    };
-//  }
-
-
-
-
-//    @Bean
-//	public BiFunction<KStream<String, Transaction>,KStream<String, Customer>,
-//            KStream<String, CustomerBalance>> processCustomerTransactions2() {
-//        return (transactionKStream,customerKStream) ->
-//        {
-//
-//            customerKStream.foreach((key, value) -> {
-//
-//                        System.out.println(" Customer Key - : " + key + " Value: " + value);
-//                    }
-//            );
-//            transactionKStream.foreach((key, value) -> {
-//
-//                        System.out.println(" Transaction Key - : " + key + " Value: " + value);
-//                    }
-//            );
-//
-//            return null;
-//        };
-//
-//	}
-
 
 }

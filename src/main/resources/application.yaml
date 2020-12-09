@@ -1,55 +1,23 @@
-
-#########  processCustomer && Transactions
+######### bindings
 spring.cloud.stream.bindings.processCustomerTransactions-in-0:
-  destination: Balance
-  consumer:
-    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-    keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
-    application-id: processCustomerTransactions_in_0
-spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-in-0:
-  consumer:
-    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-    keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
-    application-id: processCustomerTransactions_in_0
-
+  destination: Transaction
 spring.cloud.stream.bindings.processCustomerTransactions-in-1:
   destination: Customer
-spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-in-1:
-  consumer:
-    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-    application-id: processCustomerTransactions_in_1
-    materializedAs: store.Customer
-
-spring.cloud.stream.bindings.processCustomerTransactions-out-0:
+spring.cloud.stream.bindings.processCustomerTransactions-out:
   destination: CustomerBalance
-spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-out-0:
-  consumer:
-    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-    keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
-    application-id: processCustomerTransactions_out_0
-spring.cloud.stream.function.bindings.processCustomerTransactions-out-0: CustomerBalance
-spring.cloud.stream.function.bindings.processCustomerTransactions-in-0: Balance
-spring.cloud.stream.function.bindings.processCustomerTransactions-in-1: Customer
-
-
+  producer:
+    nativeEncoding: true
+spring.cloud.stream.kafka.streams.bindings.processCustomerTransactions-out:
+  producer:
+    nativeEncoding: true
+    content-type: application/*+avro
 
 
 
 ######### ######### ######### #########
-spring.cloud.stream.function.definition: processCustomer;processTransaction;processCustomerTransactions
-
+spring.cloud.stream.function.definition: processCustomerTransactions
 spring.cloud.stream.kafka.streams.binder.configuration.default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
 spring.cloud.stream.kafka.streams.binder.configuration.default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-
-
-#########  processCustomer
-spring.cloud.stream.kafka.binder.autoCreateTopics: false
-spring.cloud.stream.bindings.processCustomer-in-0:
-  destination: Customer
-spring.cloud.stream.kafka.streams.bindings.processCustomer-in-0:
-  consumer:
-    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-    application-id: processCustomer-in-0
 
 server:
   port: 9080
@@ -57,34 +25,18 @@ spring:
   kafka:
     streams:
       binder:
-        applicationId: moaii-cep
-        configuration:
-          auto.commit.interval.ms: 100
-          auto.offset.reset: latest
-          default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-          default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+        applicationId: kafka-streams-test-id
 
-
-    properties:
-      bootstrap.servers: localhost:9092
-      schema.registry.url: http://localhost:8081
+      properties:
+        bootstrap.servers: localhost:9092
+        schema.registry.url: http://localhost:8081
+        auto.commit.interval.ms: 100
     consumer:
       group-id: my-microservice
       auto-offset-reset: latest
-#      properties:
-#        interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+      properties:
+        interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
 logging:
   level:
     root: info
-spring.application.name: kafka-streams-iq-advanced-sample
-#spring.cloud.stream.bindings.input.consumer.useNativeDecoding: false
-
-#########  processTransaction Only
-
-#spring.cloud.stream.bindings.processTransaction-in-0:
-#  destination: Balance
-#spring.cloud.stream.kafka.streams.bindings.processTransaction-in-0:
-#  consumer:
-#    valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-#    application-id: processtransaction-in-0
-#
+spring.application.name: kafka-streams-test
